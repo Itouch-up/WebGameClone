@@ -167,10 +167,10 @@ function animate() {
       if ( dist - enemy.radius - projectile.radius < 1 ) {
 
         //폭발 이펙트 생성
-        for ( let i = 0; i < 8; i++ ) {
+        for ( let i = 0; i < enemy.radius*2; i++ ) {
           particles.push( new particle( projectile.x, projectile.y, Math.random()*2, enemy.color, {
-            x: Math.random() - 0.5,
-            y: Math.random() - 0.5
+            x: (Math.random() - 0.5)*(Math.random() *6),
+            y: (Math.random() - 0.5)*(Math.random() *6)
           } ) )
         }
         if ( enemy.radius - 10 > 5 ) {
@@ -204,3 +204,5 @@ addEventListener( 'click', ( event ) => {
 
 animate()
 spawnEnemies()
+
+//여기부터 시작 : https://youtu.be/eI9idPTT0c4?t=5273

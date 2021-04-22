@@ -195,7 +195,7 @@ function animate() {
             y: ( Math.random() - 0.5 ) * ( Math.random() * 6 )
           } ) )
         }
-        if ( enemy.radius - 10 > 5 ) {
+        if ( enemy.radius - 10 > 10 ) {
           //점수 증가
           score += 100
           ScoreEl.innerHTML = score

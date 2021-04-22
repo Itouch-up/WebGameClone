@@ -4,6 +4,11 @@ const c = canvas.getContext( '2d' )
 canvas.width = innerWidth
 canvas.height = innerHeight
 
+const ScoreEl = document.querySelector( '#ScoreEl' )
+const startGameBtn = document.querySelector( '#startGameBtn' )
+const modalEl = document.querySelector( '#modalEl' )
+const bigScoreEl = document.querySelector( '#bigScoreEl' )
+
 class Player {
   constructor( x, y, radius, color ) {
     this.x = x
@@ -59,6 +64,7 @@ class Enemy {
     this.y = this.y + this.velocity.y
   }
 }
+const friction = 0.99
 class particle {
   constructor( x, y, radius, color, velocity ) {
     this.x = x
@@ -79,6 +85,8 @@ class particle {
   }
   update() {
     this.draw()
+    this.velocity.x *= friction
+    this.velocity.y *= friction
     this.x = this.x + this.velocity.x
     this.y = this.y + this.velocity.y
     this.alpha -= 0.01
@@ -87,11 +95,20 @@ class particle {
 const x = canvas.width / 2
 const y = canvas.height / 2
 
-const player = new Player( x, y, 10, 'white' )
+let player = new Player( x, y, 10, 'white' )
+let projectiles = []
+let enemies = []
+let particles = []
 
-const projectiles = []
-const enemies = []
-const particles = []
+function init() {
+  player = new Player( x, y, 10, 'white' )
+  projectiles = []
+  enemies = []
+  particles = []
+  score=0
+  ScoreEl.innerHTML=score
+  bigScoreEl.innerHTML=score
+}
 
 function spawnEnemies() {
   setInterval( () => {
@@ -124,6 +141,7 @@ function spawnEnemies() {
 
 
 let animationId
+let score = 0
 
 function animate() {
   animationId = requestAnimationFrame( animate )
@@ -157,8 +175,11 @@ function animate() {
 
     const dist = Math.hypot( player.x - enemy.x, player.y - enemy.y )
 
+    //게임 종료
     if ( dist - enemy.radius - player.radius < 1 ) {
       cancelAnimationFrame( animationId )
+      modalEl.style.display = 'flex'
+      bigScoreEl.innerHTML = score
     }
     projectiles.forEach( ( projectile, projectileIndex ) => {
       const dist = Math.hypot( projectile.x - enemy.x, projectile.y - enemy.y )
@@ -166,14 +187,18 @@ function animate() {
       //발사체가 적에 닿을때
       if ( dist - enemy.radius - projectile.radius < 1 ) {
 
+
         //폭발 이펙트 생성
-        for ( let i = 0; i < enemy.radius*2; i++ ) {
-          particles.push( new particle( projectile.x, projectile.y, Math.random()*2, enemy.color, {
-            x: (Math.random() - 0.5)*(Math.random() *6),
-            y: (Math.random() - 0.5)*(Math.random() *6)
+        for ( let i = 0; i < enemy.radius * 2; i++ ) {
+          particles.push( new particle( projectile.x, projectile.y, Math.random() * 2, enemy.color, {
+            x: ( Math.random() - 0.5 ) * ( Math.random() * 6 ),
+            y: ( Math.random() - 0.5 ) * ( Math.random() * 6 )
           } ) )
         }
         if ( enemy.radius - 10 > 5 ) {
+          //점수 증가
+          score += 100
+          ScoreEl.innerHTML = score
           gsap.to( enemy, {
             radius: enemy.radius - 10
           } )
@@ -181,6 +206,9 @@ function animate() {
             projectiles.splice( projectileIndex, 1 )
           }, 0 )
         } else {
+          //점수 증가
+          score += 250
+          ScoreEl.innerHTML = score
           setTimeout( () => {
             enemies.splice( index, 1 )
             projectiles.splice( projectileIndex, 1 )
@@ -201,8 +229,9 @@ addEventListener( 'click', ( event ) => {
     canvas.width / 2, canvas.height / 2, 5, 'white', velocity
   ) )
 } )
-
-animate()
-spawnEnemies()
-
-//여기부터 시작 : https://youtu.be/eI9idPTT0c4?t=5273
+startGameBtn.addEventListener( 'click', () => {
+  init()
+  animate()
+  spawnEnemies()
+  modalEl.style.display = 'none'
+} )
